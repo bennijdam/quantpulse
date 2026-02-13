@@ -1,0 +1,832 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Pricing - Terminal</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;700&family=Space+Grotesk:wght@300;400;500;700&display=swap" rel="stylesheet">
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        :root {
+            --terminal-green: #00FF00;
+            --electric-blue: #0068FF;
+            --obsidian: #050505;
+            --amber: #FFA028;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            background: var(--obsidian);
+            color: #fff;
+            font-family: 'Space Grotesk', sans-serif;
+            overflow-x: hidden;
+        }
+
+        .mono {
+            font-family: 'JetBrains Mono', monospace;
+        }
+
+        /* Grid background */
+        .grid-background {
+            background-image: 
+                linear-gradient(rgba(0, 255, 0, 0.03) 1px, transparent 1px),
+                linear-gradient(90deg, rgba(0, 255, 0, 0.03) 1px, transparent 1px);
+            background-size: 50px 50px;
+            animation: gridMove 20s linear infinite;
+        }
+
+        @keyframes gridMove {
+            0% { background-position: 0 0; }
+            100% { background-position: 50px 50px; }
+        }
+
+        /* Glassmorphism */
+        .glass {
+            background: rgba(255, 255, 255, 0.02);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            transition: all 0.3s ease;
+        }
+
+        .glass:hover {
+            background: rgba(255, 255, 255, 0.04);
+            border-color: var(--terminal-green);
+            transform: translateY(-5px);
+            box-shadow: 0 20px 40px rgba(0, 255, 0, 0.2);
+        }
+
+        /* Scanning line effect */
+        .glass::before {
+            content: '';
+            position: absolute;
+            top: -100%;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(
+                to bottom,
+                transparent,
+                rgba(0, 255, 0, 0.1),
+                transparent
+            );
+            transition: top 0.5s ease;
+        }
+
+        .glass:hover::before {
+            animation: scan 2s ease-in-out infinite;
+        }
+
+        @keyframes scan {
+            0% { top: -100%; }
+            50% { top: 100%; }
+            100% { top: 100%; }
+        }
+
+        /* Popular badge */
+        .popular-badge {
+            background: var(--terminal-green);
+            color: #000;
+            animation: pulse-glow 2s ease-in-out infinite;
+        }
+
+        @keyframes pulse-glow {
+            0%, 100% {
+                box-shadow: 0 0 10px rgba(0, 255, 0, 0.5);
+            }
+            50% {
+                box-shadow: 0 0 20px rgba(0, 255, 0, 0.8);
+            }
+        }
+
+        /* Toggle switch */
+        .toggle-switch {
+            width: 60px;
+            height: 30px;
+            background: #1a1a1a;
+            border-radius: 15px;
+            position: relative;
+            cursor: pointer;
+            transition: background 0.3s;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .toggle-switch.active {
+            background: var(--terminal-green);
+        }
+
+        .toggle-slider {
+            width: 26px;
+            height: 26px;
+            background: #fff;
+            border-radius: 50%;
+            position: absolute;
+            top: 1px;
+            left: 2px;
+            transition: transform 0.3s;
+        }
+
+        .toggle-switch.active .toggle-slider {
+            transform: translateX(30px);
+            background: #000;
+        }
+
+        /* Fade in animations */
+        .fade-in {
+            animation: fadeIn 0.8s ease-out forwards;
+            opacity: 0;
+        }
+
+        .fade-in-delay-1 { animation-delay: 0.1s; }
+        .fade-in-delay-2 { animation-delay: 0.2s; }
+        .fade-in-delay-3 { animation-delay: 0.3s; }
+        .fade-in-delay-4 { animation-delay: 0.4s; }
+
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+                transform: translateY(30px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        /* Ticker animation */
+        .ticker {
+            animation: scroll 30s linear infinite;
+        }
+
+        @keyframes scroll {
+            0% { transform: translateX(0); }
+            100% { transform: translateX(-50%); }
+        }
+
+        /* Blink */
+        .blink {
+            animation: blink 1s infinite;
+        }
+
+        @keyframes blink {
+            0%, 50% { opacity: 1; }
+            51%, 100% { opacity: 0; }
+        }
+
+        /* CTA Button */
+        .cta-button {
+            background: var(--terminal-green);
+            color: #000;
+            font-weight: 700;
+            padding: 12px 32px;
+            border: none;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        .cta-button:hover {
+            background: #00CC00;
+            box-shadow: 0 0 30px rgba(0, 255, 0, 0.6);
+            transform: scale(1.05);
+        }
+
+        .cta-button-outline {
+            background: transparent;
+            color: var(--terminal-green);
+            border: 2px solid var(--terminal-green);
+        }
+
+        .cta-button-outline:hover {
+            background: var(--terminal-green);
+            color: #000;
+        }
+
+        /* FAQ Accordion */
+        .faq-item {
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+            transition: all 0.3s ease;
+        }
+
+        .faq-item:hover {
+            background: rgba(255, 255, 255, 0.02);
+        }
+
+        .faq-answer {
+            max-height: 0;
+            overflow: hidden;
+            transition: max-height 0.3s ease;
+        }
+
+        .faq-item.active .faq-answer {
+            max-height: 300px;
+        }
+
+        .faq-item.active .faq-icon {
+            transform: rotate(45deg);
+        }
+
+        /* Comparison table */
+        .comparison-table {
+            border-collapse: separate;
+            border-spacing: 0;
+        }
+
+        .comparison-table th,
+        .comparison-table td {
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            padding: 12px;
+        }
+
+        .comparison-table thead th {
+            background: rgba(0, 255, 0, 0.05);
+            position: sticky;
+            top: 0;
+            z-index: 10;
+        }
+
+        .comparison-table tbody tr:hover {
+            background: rgba(255, 255, 255, 0.02);
+        }
+
+        /* Noise texture */
+        .noise {
+            position: relative;
+        }
+
+        .noise::after {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 400 400' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noiseFilter'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noiseFilter)' opacity='0.05'/%3E%3C/svg%3E");
+            pointer-events: none;
+            opacity: 0.5;
+        }
+    </style>
+</head>
+<body>
+    <!-- Live Ticker Ribbon -->
+    <div class="bg-black border-b border-green-500 overflow-hidden py-2">
+        <div class="ticker flex gap-12 whitespace-nowrap mono text-xs">
+            <div class="flex gap-2">
+                <span class="text-amber-500">SPY</span>
+                <span class="text-white">485.32</span>
+                <span class="text-green-500">+0.51%</span>
+            </div>
+            <div class="flex gap-2">
+                <span class="text-amber-500">BTC-USD</span>
+                <span class="text-white">51,234.56</span>
+                <span class="text-green-500">+2.34%</span>
+            </div>
+            <div class="flex gap-2">
+                <span class="text-amber-500">ETH-USD</span>
+                <span class="text-white">2,845.21</span>
+                <span class="text-red-500">-1.12%</span>
+            </div>
+            <div class="flex gap-2">
+                <span class="text-amber-500">NASDAQ</span>
+                <span class="text-white">15,628.95</span>
+                <span class="text-red-500">-0.18%</span>
+            </div>
+            <div class="flex gap-2">
+                <span class="text-amber-500">GOLD</span>
+                <span class="text-white">2,034.50</span>
+                <span class="text-green-500">+0.82%</span>
+            </div>
+            <!-- Duplicate for seamless loop -->
+            <div class="flex gap-2">
+                <span class="text-amber-500">SPY</span>
+                <span class="text-white">485.32</span>
+                <span class="text-green-500">+0.51%</span>
+            </div>
+            <div class="flex gap-2">
+                <span class="text-amber-500">BTC-USD</span>
+                <span class="text-white">51,234.56</span>
+                <span class="text-green-500">+2.34%</span>
+            </div>
+            <div class="flex gap-2">
+                <span class="text-amber-500">ETH-USD</span>
+                <span class="text-white">2,845.21</span>
+                <span class="text-red-500">-1.12%</span>
+            </div>
+            <div class="flex gap-2">
+                <span class="text-amber-500">NASDAQ</span>
+                <span class="text-white">15,628.95</span>
+                <span class="text-red-500">-0.18%</span>
+            </div>
+        </div>
+    </div>
+
+    <!-- Header -->
+    <div class="border-b border-zinc-800 bg-black">
+        <div class="container mx-auto px-6 py-4 flex items-center justify-between">
+            <div class="flex items-center gap-2">
+                <div class="w-8 h-8 bg-green-500 rounded flex items-center justify-center">
+                    <span class="text-black font-bold mono text-sm">T</span>
+                </div>
+                <span class="text-green-500 font-bold mono text-xl">TERMINAL</span>
+            </div>
+            <nav class="hidden md:flex gap-8 text-sm">
+                <a href="/" class="text-gray-400 hover:text-green-500 transition-colors">Preview</a>
+                <a href="/pricing" class="text-white font-bold">Pricing</a>
+                <a href="/deploy" class="text-gray-400 hover:text-green-500 transition-colors">Deploy</a>
+                <a href="/deploy" class="text-gray-400 hover:text-green-500 transition-colors">Contact</a>
+            </nav>
+            <button class="cta-button mono text-xs">
+                LAUNCH TERMINAL
+            </button>
+        </div>
+    </div>
+
+    <!-- Hero Section -->
+    <section class="relative py-20 grid-background noise overflow-hidden">
+        <div class="absolute top-1/4 left-1/4 w-96 h-96 bg-green-500 rounded-full opacity-10 blur-3xl"></div>
+        <div class="absolute bottom-1/4 right-1/4 w-96 h-96 bg-blue-500 rounded-full opacity-10 blur-3xl"></div>
+
+        <div class="container mx-auto px-6 text-center relative z-10">
+            <div class="inline-block px-4 py-2 border border-green-500 rounded mono text-xs text-green-500 mb-6 fade-in">
+                <span class="pulse blink">●</span> DEMOCRATIZING FINANCIAL INTELLIGENCE
+            </div>
+            
+            <h1 class="text-5xl md:text-7xl font-bold mb-6 fade-in">
+                Institutional Power.<br/>
+                <span class="text-green-500">Accessible Pricing.</span>
+            </h1>
+            
+            <p class="text-xl text-gray-400 mb-12 max-w-3xl mx-auto fade-in fade-in-delay-1">
+                From individual traders to hedge funds. Choose the plan that scales with your ambition.
+            </p>
+
+            <!-- Monthly/Annual Toggle -->
+            <div class="flex items-center justify-center gap-4 mb-12 fade-in fade-in-delay-2">
+                <span class="text-gray-400 text-sm mono" id="monthlyLabel">Monthly</span>
+                <div class="toggle-switch" id="billingToggle" onclick="toggleBilling()">
+                    <div class="toggle-slider"></div>
+                </div>
+                <div class="flex items-center gap-2">
+                    <span class="text-white text-sm mono" id="annualLabel">Annual</span>
+                    <span class="text-xs px-2 py-1 bg-green-500 text-black rounded font-bold mono">
+                        SAVE 17%
+                    </span>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Pricing Tiers -->
+    <section class="py-20 bg-gradient-to-b from-black to-zinc-900">
+        <div class="container mx-auto px-6">
+            <div class="grid md:grid-cols-3 gap-8 max-w-6xl mx-auto">
+                
+                <!-- Tier 1: Free -->
+                <div class="glass rounded-lg p-8 relative fade-in fade-in-delay-1">
+                    <div class="mb-6">
+                        <div class="text-green-500 text-sm mono mb-2">TERMINAL_FREE</div>
+                        <div class="text-5xl font-bold mb-2 mono">
+                            $0
+                            <span class="text-xl text-gray-500">/mo</span>
+                        </div>
+                        <p class="text-gray-400 text-sm">For individual retail traders</p>
+                    </div>
+
+                    <ul class="space-y-3 mb-8 text-sm">
+                        <li class="flex items-start gap-2">
+                            <svg class="w-5 h-5 text-green-500 shrink-0 mt-0.5" fill="currentColor" viewBox="0 0 20 20">
+                                <path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd"/>
+                            </svg>
+                            <span>5 watchlists (50 tickers each)</span>
+                        </li>
+                        <li class="flex items-start gap-2">
+                            <svg class="w-5 h-5 text-green-500 shrink-0 mt-0.5" fill="currentColor" viewBox="0 0 20 20">
+                                <path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd"/>
+                            </svg>
+                            <span>Basic &lt;N&gt; newsfeed</span>
+                        </li>
+                        <li class="flex items-start gap-2">
+                            <svg class="w-5 h-5 text-green-500 shrink-0 mt-0.5" fill="currentColor" viewBox="0 0 20 20">
+                                <path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd"/>
+                            </svg>
+                            <span>1 AI summary per day</span>
+                        </li>
+                        <li class="flex items-start gap-2">
+                            <svg class="w-5 h-5 text-green-500 shrink-0 mt-0.5" fill="currentColor" viewBox="0 0 20 20">
+                                <path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd"/>
+                            </svg>
+                            <span>15-minute delayed data</span>
+                        </li>
+                        <li class="flex items-start gap-2">
+                            <svg class="w-5 h-5 text-green-500 shrink-0 mt-0.5" fill="currentColor" viewBox="0 0 20 20">
+                                <path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd"/>
+                            </svg>
+                            <span>Community Discord access</span>
+                        </li>
+                    </ul>
+
+                    <button class="w-full py-3 cta-button-outline rounded mono text-sm">
+                        INITIATE_FREE_ACCESS
+                    </button>
+                </div>
+
+                <!-- Tier 2: Pro (Popular) -->
+                <div class="glass rounded-lg p-8 relative border-2 border-green-500 fade-in fade-in-delay-2" style="box-shadow: 0 0 40px rgba(0, 255, 0, 0.2);">
+                    <div class="absolute -top-4 left-1/2 transform -translate-x-1/2 popular-badge px-6 py-2 rounded-full text-xs mono font-bold">
+                        MOST POPULAR
+                    </div>
+                    
+                    <div class="mb-6 mt-4">
+                        <div class="text-green-500 text-sm mono mb-2">PRO_ANALYST</div>
+                        <div class="text-5xl font-bold mb-2 mono text-green-500">
+                            <span id="proPrice">$49</span>
+                            <span class="text-xl text-gray-500">/mo</span>
+                        </div>
+                        <p class="text-gray-400 text-sm">For professional day traders</p>
+                    </div>
+
+                    <ul class="space-y-3 mb-8 text-sm">
+                        <li class="flex items-start gap-2">
+                            <svg class="w-5 h-5 text-green-500 shrink-0 mt-0.5" fill="currentColor" viewBox="0 0 20 20">
+                                <path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd"/>
+                            </svg>
+                            <span><strong>Unlimited</strong> watchlists</span>
+                        </li>
+                        <li class="flex items-start gap-2">
+                            <svg class="w-5 h-5 text-green-500 shrink-0 mt-0.5" fill="currentColor" viewBox="0 0 20 20">
+                                <path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd"/>
+                            </svg>
+                            <span><strong>Real-time</strong> market data</span>
+                        </li>
+                        <li class="flex items-start gap-2">
+                            <svg class="w-5 h-5 text-green-500 shrink-0 mt-0.5" fill="currentColor" viewBox="0 0 20 20">
+                                <path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd"/>
+                            </svg>
+                            <span>Full AI sentiment analysis</span>
+                        </li>
+                        <li class="flex items-start gap-2">
+                            <svg class="w-5 h-5 text-green-500 shrink-0 mt-0.5" fill="currentColor" viewBox="0 0 20 20">
+                                <path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd"/>
+                            </svg>
+                            <span>Level 2 market depth</span>
+                        </li>
+                        <li class="flex items-start gap-2">
+                            <svg class="w-5 h-5 text-green-500 shrink-0 mt-0.5" fill="currentColor" viewBox="0 0 20 20">
+                                <path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd"/>
+                            </svg>
+                            <span>Excel/Google Sheets plugin</span>
+                        </li>
+                        <li class="flex items-start gap-2">
+                            <svg class="w-5 h-5 text-green-500 shrink-0 mt-0.5" fill="currentColor" viewBox="0 0 20 20">
+                                <path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd"/>
+                            </svg>
+                            <span>Priority news wire</span>
+                        </li>
+                        <li class="flex items-start gap-2">
+                            <svg class="w-5 h-5 text-green-500 shrink-0 mt-0.5" fill="currentColor" viewBox="0 0 20 20">
+                                <path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd"/>
+                            </svg>
+                            <span>Email + Discord support</span>
+                        </li>
+                    </ul>
+
+                    <button class="w-full py-3 cta-button rounded mono text-sm font-bold">
+                        UPGRADE_TO_PRO →
+                    </button>
+                </div>
+
+                <!-- Tier 3: Institutional -->
+                <div class="glass rounded-lg p-8 relative fade-in fade-in-delay-3">
+                    <div class="mb-6">
+                        <div class="text-blue-500 text-sm mono mb-2">INSTITUTIONAL</div>
+                        <div class="text-5xl font-bold mb-2 mono">
+                            Custom
+                        </div>
+                        <p class="text-gray-400 text-sm">For hedge funds & teams</p>
+                    </div>
+
+                    <ul class="space-y-3 mb-8 text-sm">
+                        <li class="flex items-start gap-2">
+                            <svg class="w-5 h-5 text-green-500 shrink-0 mt-0.5" fill="currentColor" viewBox="0 0 20 20">
+                                <path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd"/>
+                            </svg>
+                            <span>Custom API endpoints</span>
+                        </li>
+                        <li class="flex items-start gap-2">
+                            <svg class="w-5 h-5 text-green-500 shrink-0 mt-0.5" fill="currentColor" viewBox="0 0 20 20">
+                                <path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd"/>
+                            </svg>
+                            <span>White-labeled reporting</span>
+                        </li>
+                        <li class="flex items-start gap-2">
+                            <svg class="w-5 h-5 text-green-500 shrink-0 mt-0.5" fill="currentColor" viewBox="0 0 20 20">
+                                <path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd"/>
+                            </svg>
+                            <span>Dedicated account manager</span>
+                        </li>
+                        <li class="flex items-start gap-2">
+                            <svg class="w-5 h-5 text-green-500 shrink-0 mt-0.5" fill="currentColor" viewBox="0 0 20 20">
+                                <path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd"/>
+                            </svg>
+                            <span>Multi-seat discounts</span>
+                        </li>
+                        <li class="flex items-start gap-2">
+                            <svg class="w-5 h-5 text-green-500 shrink-0 mt-0.5" fill="currentColor" viewBox="0 0 20 20">
+                                <path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd"/>
+                            </svg>
+                            <span>&lt;1ms latency guarantee</span>
+                        </li>
+                        <li class="flex items-start gap-2">
+                            <svg class="w-5 h-5 text-green-500 shrink-0 mt-0.5" fill="currentColor" viewBox="0 0 20 20">
+                                <path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd"/>
+                            </svg>
+                            <span>Direct exchange feeds</span>
+                        </li>
+                        <li class="flex items-start gap-2">
+                            <svg class="w-5 h-5 text-green-500 shrink-0 mt-0.5" fill="currentColor" viewBox="0 0 20 20">
+                                <path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd"/>
+                            </svg>
+                            <span>99.99% uptime SLA</span>
+                        </li>
+                    </ul>
+
+                    <button class="w-full py-3 border-2 border-blue-500 text-blue-500 rounded mono text-sm font-bold hover:bg-blue-500 hover:text-black transition-all">
+                        CONTACT_DESK [CON &lt;GO&gt;]
+                    </button>
+                </div>
+
+            </div>
+        </div>
+    </section>
+
+    <!-- Comparison Table -->
+    <section class="py-20 bg-black">
+        <div class="container mx-auto px-6">
+            <div class="text-center mb-12">
+                <h2 class="text-4xl font-bold mb-4">Full Feature Comparison</h2>
+                <p class="text-gray-400 mono text-sm">&lt;COMPARE_PLANS&gt;</p>
+            </div>
+
+            <div class="overflow-x-auto">
+                <table class="comparison-table w-full mono text-xs">
+                    <thead>
+                        <tr class="text-left">
+                            <th class="text-amber-500">FEATURE</th>
+                            <th class="text-center text-green-500">FREE</th>
+                            <th class="text-center text-green-500">PRO</th>
+                            <th class="text-center text-blue-500">INSTITUTIONAL</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td class="text-amber-500">Watchlists</td>
+                            <td class="text-center text-white">5</td>
+                            <td class="text-center text-green-500">Unlimited</td>
+                            <td class="text-center text-green-500">Unlimited</td>
+                        </tr>
+                        <tr>
+                            <td class="text-amber-500">Real-time Data</td>
+                            <td class="text-center text-red-500">✗</td>
+                            <td class="text-center text-green-500">✓</td>
+                            <td class="text-center text-green-500">✓</td>
+                        </tr>
+                        <tr>
+                            <td class="text-amber-500">AI Summaries/Day</td>
+                            <td class="text-center text-white">1</td>
+                            <td class="text-center text-green-500">Unlimited</td>
+                            <td class="text-center text-green-500">Unlimited</td>
+                        </tr>
+                        <tr>
+                            <td class="text-amber-500">Sentiment Analysis</td>
+                            <td class="text-center text-red-500">✗</td>
+                            <td class="text-center text-green-500">✓</td>
+                            <td class="text-center text-green-500">✓</td>
+                        </tr>
+                        <tr>
+                            <td class="text-amber-500">Level 2 Market Data</td>
+                            <td class="text-center text-red-500">✗</td>
+                            <td class="text-center text-green-500">✓</td>
+                            <td class="text-center text-green-500">✓</td>
+                        </tr>
+                        <tr>
+                            <td class="text-amber-500">Options Flow</td>
+                            <td class="text-center text-red-500">✗</td>
+                            <td class="text-center text-green-500">✓</td>
+                            <td class="text-center text-green-500">✓</td>
+                        </tr>
+                        <tr>
+                            <td class="text-amber-500">Excel Integration</td>
+                            <td class="text-center text-red-500">✗</td>
+                            <td class="text-center text-green-500">✓</td>
+                            <td class="text-center text-green-500">✓</td>
+                        </tr>
+                        <tr>
+                            <td class="text-amber-500">API Access</td>
+                            <td class="text-center text-red-500">✗</td>
+                            <td class="text-center text-yellow-500">Limited</td>
+                            <td class="text-center text-green-500">Custom</td>
+                        </tr>
+                        <tr>
+                            <td class="text-amber-500">Data Latency</td>
+                            <td class="text-center text-white">15min</td>
+                            <td class="text-center text-white">&lt;100ms</td>
+                            <td class="text-center text-green-500">&lt;1ms</td>
+                        </tr>
+                        <tr>
+                            <td class="text-amber-500">White-label Reports</td>
+                            <td class="text-center text-red-500">✗</td>
+                            <td class="text-center text-red-500">✗</td>
+                            <td class="text-center text-green-500">✓</td>
+                        </tr>
+                        <tr>
+                            <td class="text-amber-500">Account Manager</td>
+                            <td class="text-center text-red-500">✗</td>
+                            <td class="text-center text-red-500">✗</td>
+                            <td class="text-center text-green-500">✓</td>
+                        </tr>
+                        <tr>
+                            <td class="text-amber-500">SLA Guarantee</td>
+                            <td class="text-center text-white">95%</td>
+                            <td class="text-center text-white">99%</td>
+                            <td class="text-center text-green-500">99.99%</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </section>
+
+    <!-- FAQ Section -->
+    <section class="py-20 bg-zinc-900">
+        <div class="container mx-auto px-6 max-w-4xl">
+            <div class="text-center mb-12">
+                <h2 class="text-4xl font-bold mb-4">Frequently Asked Questions</h2>
+                <p class="text-gray-400 mono text-sm">[HELP &lt;GO&gt;]</p>
+            </div>
+
+            <div class="space-y-4">
+                <div class="faq-item glass rounded-lg overflow-hidden" onclick="toggleFaq(this)">
+                    <div class="flex items-center justify-between p-6 cursor-pointer">
+                        <h3 class="font-bold text-lg">What's the data latency on each plan?</h3>
+                        <div class="faq-icon text-2xl text-green-500 transition-transform">+</div>
+                    </div>
+                    <div class="faq-answer px-6 pb-6">
+                        <p class="text-gray-400">Free tier has 15-minute delayed data (perfect for learning). Pro tier delivers sub-100ms latency with direct exchange connections. Institutional plans guarantee sub-1ms latency with dedicated fiber lines to major exchanges.</p>
+                    </div>
+                </div>
+
+                <div class="faq-item glass rounded-lg overflow-hidden" onclick="toggleFaq(this)">
+                    <div class="flex items-center justify-between p-6 cursor-pointer">
+                        <h3 class="font-bold text-lg">Are there any exchange fees?</h3>
+                        <div class="faq-icon text-2xl text-green-500 transition-transform">+</div>
+                    </div>
+                    <div class="faq-answer px-6 pb-6">
+                        <p class="text-gray-400">Our pricing is all-in. No hidden exchange fees, no per-quote charges. Pro and Institutional tiers include all major US exchanges (NYSE, NASDAQ, CBOE). International exchanges available as add-ons.</p>
+                    </div>
+                </div>
+
+                <div class="faq-item glass rounded-lg overflow-hidden" onclick="toggleFaq(this)">
+                    <div class="flex items-center justify-between p-6 cursor-pointer">
+                        <h3 class="font-bold text-lg">Can I upgrade or downgrade anytime?</h3>
+                        <div class="faq-icon text-2xl text-green-500 transition-transform">+</div>
+                    </div>
+                    <div class="faq-answer px-6 pb-6">
+                        <p class="text-gray-400">Absolutely. Upgrade instantly—new features activate immediately. Downgrades take effect at the end of your billing cycle. No penalties, no questions asked.</p>
+                    </div>
+                </div>
+
+                <div class="faq-item glass rounded-lg overflow-hidden" onclick="toggleFaq(this)">
+                    <div class="flex items-center justify-between p-6 cursor-pointer">
+                        <h3 class="font-bold text-lg">How does the AI work?</h3>
+                        <div class="faq-icon text-2xl text-green-500 transition-transform">+</div>
+                    </div>
+                    <div class="faq-answer px-6 pb-6">
+                        <p class="text-gray-400">Our AI is fine-tuned on 10 years of financial data. It analyzes earnings calls, SEC filings, and news sentiment in real-time. Free tier gets 1 summary/day. Pro gets unlimited AI analysis with full source attribution and confidence scores.</p>
+                    </div>
+                </div>
+
+                <div class="faq-item glass rounded-lg overflow-hidden" onclick="toggleFaq(this)">
+                    <div class="flex items-center justify-between p-6 cursor-pointer">
+                        <h3 class="font-bold text-lg">Do you offer refunds?</h3>
+                        <div class="faq-icon text-2xl text-green-500 transition-transform">+</div>
+                    </div>
+                    <div class="faq-answer px-6 pb-6">
+                        <p class="text-gray-400">Yes. 14-day money-back guarantee on all paid plans. No questions asked. Just email support@terminal.com with "REFUND" in the subject line.</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Final CTA -->
+    <section class="py-32 relative grid-background noise">
+        <div class="absolute inset-0 bg-gradient-to-t from-black via-transparent to-black"></div>
+        <div class="container mx-auto px-6 text-center relative z-10">
+            <h2 class="text-6xl font-bold mb-6">Ready to Trade Smarter?</h2>
+            <p class="text-gray-400 text-xl mb-12">Start free. Upgrade when you're ready. Cancel anytime.</p>
+            <div class="flex gap-4 justify-center">
+                <button class="cta-button mono text-sm px-8 py-4">
+                    START FREE TRIAL →
+                </button>
+                <button class="cta-button-outline mono text-sm px-8 py-4 rounded">
+                    TALK TO SALES
+                </button>
+            </div>
+            <p class="text-xs text-gray-500 mono mt-6">No credit card required • 14-day money-back guarantee</p>
+        </div>
+    </section>
+
+    <!-- Footer -->
+    <footer class="border-t border-gray-800 py-12 bg-black">
+        <div class="container mx-auto px-6">
+            <div class="grid md:grid-cols-4 gap-8 mb-8">
+                <div>
+                    <h3 class="font-bold text-green-500 mb-4 mono text-lg">TERMINAL</h3>
+                    <p class="text-gray-400 text-sm">Professional market intelligence for the modern trader</p>
+                </div>
+                <div>
+                    <h4 class="font-bold mb-4 text-sm">Product</h4>
+                    <ul class="space-y-2 text-sm text-gray-400">
+                        <li><a href="#" class="hover:text-green-500 transition-colors">Features</a></li>
+                        <li><a href="#" class="hover:text-green-500 transition-colors">Pricing</a></li>
+                        <li><a href="#" class="hover:text-green-500 transition-colors">API Docs</a></li>
+                        <li><a href="#" class="hover:text-green-500 transition-colors">Changelog</a></li>
+                    </ul>
+                </div>
+                <div>
+                    <h4 class="font-bold mb-4 text-sm">Company</h4>
+                    <ul class="space-y-2 text-sm text-gray-400">
+                        <li><a href="#" class="hover:text-green-500 transition-colors">About</a></li>
+                        <li><a href="#" class="hover:text-green-500 transition-colors">Blog</a></li>
+                        <li><a href="#" class="hover:text-green-500 transition-colors">Careers</a></li>
+                        <li><a href="#" class="hover:text-green-500 transition-colors">Contact</a></li>
+                    </ul>
+                </div>
+                <div>
+                    <h4 class="font-bold mb-4 text-sm">Legal</h4>
+                    <ul class="space-y-2 text-sm text-gray-400">
+                        <li><a href="#" class="hover:text-green-500 transition-colors">Privacy</a></li>
+                        <li><a href="#" class="hover:text-green-500 transition-colors">Terms</a></li>
+                        <li><a href="#" class="hover:text-green-500 transition-colors">Security</a></li>
+                    </ul>
+                </div>
+            </div>
+            <div class="border-t border-gray-800 pt-8 flex flex-col md:flex-row justify-between items-center">
+                <p class="text-gray-500 text-sm mono">© 2026 Terminal. All rights reserved.</p>
+                <div class="flex gap-4 mt-4 md:mt-0">
+                    <a href="#" class="text-gray-400 hover:text-green-500 transition-colors">
+                        <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 24 24">
+                            <path d="M8.29 20.251c7.547 0 11.675-6.253 11.675-11.675 0-.178 0-.355-.012-.53A8.348 8.348 0 0022 5.92a8.19 8.19 0 01-2.357.646 4.118 4.118 0 001.804-2.27 8.224 8.224 0 01-2.605.996 4.107 4.107 0 00-6.993 3.743 11.65 11.65 0 01-8.457-4.287 4.106 4.106 0 001.27 5.477A4.072 4.072 0 012.8 9.713v.052a4.105 4.105 0 003.292 4.022 4.095 4.095 0 01-1.853.07 4.108 4.108 0 003.834 2.85A8.233 8.233 0 012 18.407a11.616 11.616 0 006.29 1.84"/>
+                        </svg>
+                    </a>
+                    <a href="#" class="text-gray-400 hover:text-green-500 transition-colors">
+                        <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 24 24">
+                            <path fill-rule="evenodd" d="M12 2C6.477 2 2 6.484 2 12.017c0 4.425 2.865 8.18 6.839 9.504.5.092.682-.217.682-.483 0-.237-.008-.868-.013-1.703-2.782.605-3.369-1.343-3.369-1.343-.454-1.158-1.11-1.466-1.11-1.466-.908-.62.069-.608.069-.608 1.003.07 1.531 1.032 1.531 1.032.892 1.53 2.341 1.088 2.91.832.092-.647.35-1.088.636-1.338-2.22-.253-4.555-1.113-4.555-4.951 0-1.093.39-1.988 1.029-2.688-.103-.253-.446-1.272.098-2.65 0 0 .84-.27 2.75 1.026A9.564 9.564 0 0112 6.844c.85.004 1.705.115 2.504.337 1.909-1.296 2.747-1.027 2.747-1.027.546 1.379.202 2.398.1 2.651.64.7 1.028 1.595 1.028 2.688 0 3.848-2.339 4.695-4.566 4.943.359.309.678.92.678 1.855 0 1.338-.012 2.419-.012 2.747 0 .268.18.58.688.482A10.019 10.019 0 0022 12.017C22 6.484 17.522 2 12 2z" clip-rule="evenodd"/>
+                        </svg>
+                    </a>
+                    <a href="#" class="text-gray-400 hover:text-green-500 transition-colors">
+                        <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 24 24">
+                            <path d="M20.447 20.452h-3.554v-5.569c0-1.328-.027-3.037-1.852-3.037-1.853 0-2.136 1.445-2.136 2.939v5.667H9.351V9h3.414v1.561h.046c.477-.9 1.637-1.85 3.37-1.85 3.601 0 4.267 2.37 4.267 5.455v6.286zM5.337 7.433c-1.144 0-2.063-.926-2.063-2.065 0-1.138.92-2.063 2.063-2.063 1.14 0 2.064.925 2.064 2.063 0 1.139-.925 2.065-2.064 2.065zm1.782 13.019H3.555V9h3.564v11.452zM22.225 0H1.771C.792 0 0 .774 0 1.729v20.542C0 23.227.792 24 1.771 24h20.451C23.2 24 24 23.227 24 22.271V1.729C24 .774 23.2 0 22.222 0h.003z"/>
+                        </svg>
+                    </a>
+                </div>
+            </div>
+        </div>
+    </footer>
+
+    <script>
+        let isAnnual = false;
+
+        function toggleBilling() {
+            isAnnual = !isAnnual;
+            const toggle = document.getElementById('billingToggle');
+            const proPrice = document.getElementById('proPrice');
+            
+            if (isAnnual) {
+                toggle.classList.add('active');
+                proPrice.textContent = '$41'; // $49 * 0.83 (17% discount)
+            } else {
+                toggle.classList.remove('active');
+                proPrice.textContent = '$49';
+            }
+        }
+
+        function toggleFaq(element) {
+            const allItems = document.querySelectorAll('.faq-item');
+            allItems.forEach(item => {
+                if (item !== element) {
+                    item.classList.remove('active');
+                }
+            });
+            element.classList.toggle('active');
+        }
+    </script>
+</body>
+</html>
