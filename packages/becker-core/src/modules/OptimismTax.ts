@@ -25,16 +25,16 @@ export class OptimismTax {
     tradingVolume: number,
     volatility: number
   ): AnalyticsResult {
-    // Placeholder implementation
+    // TODO: Placeholder implementation - Replace with actual calculation logic
     // In production, this would incorporate:
     // - Order flow analysis
     // - Bid-ask spread asymmetries
     // - YES/NO outcome premium analysis
     // - Market maker profit extraction
     
-    const baseRate = 0.0
+    const BASE_RATE_PLACEHOLDER = 0.0 // TODO: Calculate from market conditions
     const optimismPremium = bullishSentiment * 0.01 // Simplified calculation
-    const totalTax = baseRate + optimismPremium
+    const totalTax = BASE_RATE_PLACEHOLDER + optimismPremium
 
     const result: AnalyticsResult = {
       metric: 'optimism-tax',
@@ -42,7 +42,7 @@ export class OptimismTax {
       timestamp: new Date(),
       confidence: 0.75,
       metadata: {
-        baseRate,
+        baseRate: BASE_RATE_PLACEHOLDER,
         optimismPremium,
         bullishSentiment,
         tradingVolume,
@@ -65,14 +65,14 @@ export class OptimismTax {
     tradingVolume: number,
     volatility: number
   ): OptimismTaxData {
-    // Placeholder for detailed component analysis
-    const baseRate = 0.0
+    // TODO: Placeholder for detailed component analysis
+    const BASE_RATE_PLACEHOLDER = 0.0
     const optimismPremium = bullishSentiment * 0.01
 
     return {
-      baseRate,
+      baseRate: BASE_RATE_PLACEHOLDER,
       optimismPremium,
-      totalTax: baseRate + optimismPremium,
+      totalTax: BASE_RATE_PLACEHOLDER + optimismPremium,
       marketConditions: {
         bullishSentiment,
         tradingVolume,

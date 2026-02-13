@@ -9,6 +9,8 @@ name = "quantpulse-edge"
 binding = "ANALYTICS_DATA"
 bucket_name = "quantpulse-analytics"
 
+# Note: Replace 'your_kv_namespace_id' with your actual KV namespace ID
+# Create a KV namespace: wrangler kv:namespace create CACHE
 [[kv_namespaces]]
 binding = "CACHE"
 id = "your_kv_namespace_id"
