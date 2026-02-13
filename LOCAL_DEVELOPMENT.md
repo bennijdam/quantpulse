@@ -332,7 +332,7 @@ For the best development experience, install these VS Code extensions:
 
 ### VS Code Settings
 
-Create a `.vscode/settings.json` file (if it doesn't exist):
+The repository includes a `.vscode/settings.json` file with recommended settings:
 
 ```json
 {
@@ -342,9 +342,21 @@ Create a `.vscode/settings.json` file (if it doesn't exist):
     "source.fixAll.eslint": true
   },
   "typescript.tsdk": "node_modules/typescript/lib",
-  "typescript.enablePromptUseWorkspaceTsdk": true
+  "typescript.enablePromptUseWorkspaceTsdk": true,
+  "files.exclude": {
+    "**/.turbo": true,
+    "**/node_modules": true
+  },
+  "search.exclude": {
+    "**/node_modules": true,
+    "**/.next": true,
+    "**/dist": true,
+    "**/.turbo": true
+  }
 }
 ```
+
+These settings are already included in the repository, so you don't need to create them manually.
 
 ## 🎯 Next Steps
 
