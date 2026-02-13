@@ -1,0 +1,83 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id        String   @id @default(cuid())
+  email     String   @unique
+  name      String?
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  
+  portfolios Portfolio[]
+  trades     Trade[]
+}
+
+model Portfolio {
+  id          String   @id @default(cuid())
+  name        String
+  description String?
+  userId      String
+  user        User     @relation(fields: [userId], references: [id])
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+  
+  positions Position[]
+  trades    Trade[]
+}
+
+model Position {
+  id          String    @id @default(cuid())
+  symbol      String
+  quantity    Float
+  entryPrice  Float
+  currentPrice Float?
+  portfolioId String
+  portfolio   Portfolio @relation(fields: [portfolioId], references: [id])
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+}
+
+model Trade {
+  id           String    @id @default(cuid())
+  symbol       String
+  type         String    // 'BUY' or 'SELL'
+  quantity     Float
+  price        Float
+  userId       String
+  user         User      @relation(fields: [userId], references: [id])
+  portfolioId  String?
+  portfolio    Portfolio? @relation(fields: [portfolioId], references: [id])
+  executedAt   DateTime  @default(now())
+  
+  analytics TradeAnalytics?
+}
+
+model TradeAnalytics {
+  id              String   @id @default(cuid())
+  tradeId         String   @unique
+  trade           Trade    @relation(fields: [tradeId], references: [id])
+  mispricingDelta Float?
+  optimismTax     Float?
+  sentiment       Float?
+  confidence      Float?
+  createdAt       DateTime @default(now())
+}
+
+model MarketData {
+  id        String   @id @default(cuid())
+  symbol    String
+  price     Float
+  volume    Float
+  timestamp DateTime @default(now())
+  
+  @@index([symbol, timestamp])
+}

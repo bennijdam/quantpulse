@@ -1,0 +1,28 @@
+{
+  "$schema": "https://openapi.vercel.sh/vercel.json",
+  "buildCommand": "turbo build --filter=terminal --filter=marketing",
+  "outputDirectory": ".next",
+  "devCommand": "turbo dev --filter=terminal --filter=marketing",
+  "installCommand": "npm install",
+  "framework": null,
+  "projects": [
+    {
+      "name": "quantpulse-terminal",
+      "framework": "nextjs",
+      "buildCommand": "cd apps/terminal && npm run build",
+      "outputDirectory": "apps/terminal/.next",
+      "devCommand": "cd apps/terminal && npm run dev",
+      "installCommand": "npm install",
+      "rootDirectory": "apps/terminal"
+    },
+    {
+      "name": "quantpulse-marketing",
+      "framework": "nextjs",
+      "buildCommand": "cd apps/marketing && npm run build",
+      "outputDirectory": "apps/marketing/.next",
+      "devCommand": "cd apps/marketing && npm run dev",
+      "installCommand": "npm install",
+      "rootDirectory": "apps/marketing"
+    }
+  ]
+}
