@@ -1,0 +1,23 @@
+{
+  "version": 2,
+  "builds": [
+    {
+      "src": "apps/terminal/package.json",
+      "use": "@vercel/next"
+    },
+    {
+      "src": "apps/marketing/package.json",
+      "use": "@vercel/next"
+    }
+  ],
+  "routes": [
+    {
+      "src": "/terminal(.*)",
+      "dest": "apps/terminal/$1"
+    },
+    {
+      "src": "/(.*)",
+      "dest": "apps/marketing/$1"
+    }
+  ]
+}
