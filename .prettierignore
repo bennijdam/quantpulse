@@ -1,0 +1,17 @@
+.env
+.env.local
+.env*.local
+node_modules
+dist
+.next
+out
+build
+.turbo
+.DS_Store
+*.log
+coverage
+.vercel
+.wrangler
+.prisma
+data/
+*.tsbuildinfo

@@ -1,0 +1,48 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+  directUrl = env("DIRECT_DATABASE_URL")
+}
+
+model MarketData {
+  id        String   @id @default(cuid())
+  timestamp DateTime @default(now())
+  symbol    String
+  price     Float
+  volume    Float
+  bid       Float?
+  ask       Float?
+  metadata  Json?
+  
+  @@index([symbol, timestamp])
+  @@map("market_data")
+}
+
+model AnalyticsResult {
+  id         String   @id @default(cuid())
+  timestamp  DateTime @default(now())
+  metric     String
+  value      Float
+  confidence Float?
+  metadata   Json?
+  
+  @@index([metric, timestamp])
+  @@map("analytics_results")
+}
+
+model User {
+  id        String   @id @default(cuid())
+  email     String   @unique
+  name      String?
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  
+  @@map("users")
+}
