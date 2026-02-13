@@ -1,0 +1,762 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AI-Powered Terminal - Preview</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'Courier New', Courier, monospace;
+            background: #000;
+            color: #fff;
+            overflow: hidden;
+        }
+
+        .terminal-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            grid-template-rows: 1fr 1fr;
+            gap: 1px;
+            background: #FFA028;
+            height: calc(100vh - 160px);
+        }
+
+        .panel {
+            background: #000;
+            overflow-y: auto;
+            overflow-x: hidden;
+        }
+
+        .panel::-webkit-scrollbar {
+            width: 8px;
+        }
+
+        .panel::-webkit-scrollbar-track {
+            background: #1a1a1a;
+        }
+
+        .panel::-webkit-scrollbar-thumb {
+            background: #FFA028;
+        }
+
+        .ticker-tape {
+            animation: scroll 30s linear infinite;
+        }
+
+        @keyframes scroll {
+            0% { transform: translateX(0); }
+            100% { transform: translateX(-50%); }
+        }
+
+        .news-item:hover,
+        .market-row:hover {
+            background: #1a1a1a;
+        }
+
+        .blink {
+            animation: blink-animation 1s infinite;
+        }
+
+        @keyframes blink-animation {
+            0%, 50% { opacity: 1; }
+            51%, 100% { opacity: 0; }
+        }
+
+        input:focus {
+            outline: none;
+        }
+
+        .command-input::placeholder {
+            color: #666;
+        }
+
+        table {
+            border-collapse: collapse;
+            width: 100%;
+        }
+
+        th {
+            position: sticky;
+            top: 0;
+            background: #000;
+            z-index: 10;
+        }
+
+        .chart-container {
+            position: relative;
+            height: 250px;
+            padding: 10px;
+        }
+
+        .volume-chart {
+            position: relative;
+            height: 120px;
+            padding: 10px;
+        }
+
+        .modal {
+            display: none;
+            position: fixed;
+            inset: 0;
+            background: rgba(0, 0, 0, 0.9);
+            z-index: 1000;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .modal.active {
+            display: flex;
+        }
+
+        .pulse {
+            animation: pulse 2s infinite;
+        }
+
+        @keyframes pulse {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.5; }
+        }
+
+        .related-play {
+            transition: all 0.3s ease;
+        }
+
+        .related-play:hover {
+            background: #1a1a1a;
+            transform: translateX(4px);
+        }
+    </style>
+</head>
+<body>
+    <!-- Live Ticker Ribbon -->
+    <div class="bg-black border-b border-green-500 overflow-hidden py-2">
+        <div class="ticker flex gap-12 whitespace-nowrap text-xs">
+            <div class="flex gap-2">
+                <span class="text-amber-500">SPY</span>
+                <span class="text-white">485.32</span>
+                <span class="text-green-500">+0.51%</span>
+            </div>
+            <div class="flex gap-2">
+                <span class="text-amber-500">BTC-USD</span>
+                <span class="text-white">51,234.56</span>
+                <span class="text-green-500">+2.34%</span>
+            </div>
+            <div class="flex gap-2">
+                <span class="text-amber-500">ETH-USD</span>
+                <span class="text-white">2,845.21</span>
+                <span class="text-red-500">-1.12%</span>
+            </div>
+            <div class="flex gap-2">
+                <span class="text-amber-500">NASDAQ</span>
+                <span class="text-white">15,628.95</span>
+                <span class="text-red-500">-0.18%</span>
+            </div>
+            <!-- Duplicate for seamless loop -->
+            <div class="flex gap-2">
+                <span class="text-amber-500">SPY</span>
+                <span class="text-white">485.32</span>
+                <span class="text-green-500">+0.51%</span>
+            </div>
+            <div class="flex gap-2">
+                <span class="text-amber-500">BTC-USD</span>
+                <span class="text-white">51,234.56</span>
+                <span class="text-green-500">+2.34%</span>
+            </div>
+            <div class="flex gap-2">
+                <span class="text-amber-500">ETH-USD</span>
+                <span class="text-white">2,845.21</span>
+                <span class="text-red-500">-1.12%</span>
+            </div>
+            <div class="flex gap-2">
+                <span class="text-amber-500">NASDAQ</span>
+                <span class="text-white">15,628.95</span>
+                <span class="text-red-500">-0.18%</span>
+            </div>
+        </div>
+    </div>
+
+    <!-- Command Bar -->
+    <div class="border-b border-amber-600">
+        <div class="flex items-center gap-4 px-4 py-2 bg-black">
+            <span class="text-amber-500 font-bold text-sm">TERMINAL&gt;</span>
+            <div class="hidden md:flex items-center gap-3 text-xs">
+                <a href="/" class="text-green-500 hover:underline">PREVIEW</a>
+                <a href="/pricing" class="text-zinc-400 hover:text-green-500">PRICING</a>
+                <a href="/deploy" class="text-zinc-400 hover:text-green-500">DEPLOY</a>
+            </div>
+            <div class="flex-1 flex items-center gap-2 bg-black border border-zinc-700 rounded px-2">
+                <span id="aiModeBadge" class="text-green-500 text-xs font-bold px-2 py-1 bg-green-500 bg-opacity-10 rounded hidden">
+                    AI
+                </span>
+                <input 
+                    id="commandInput"
+                    type="text" 
+                    class="flex-1 bg-transparent text-white text-sm command-input"
+                    placeholder="Enter ticker symbol or function..."
+                    autofocus
+                />
+                <span id="aiProcessing" class="text-green-500 text-xs pulse hidden">Processing...</span>
+            </div>
+            <button id="aiModeToggle" class="px-3 py-1 rounded text-xs font-bold bg-zinc-800 text-green-500">
+                AI MODE
+            </button>
+            <span class="text-amber-500 text-sm" id="clock">00:00:00</span>
+            <span class="text-green-500 text-sm flex items-center gap-1">
+                <span class="w-2 h-2 bg-green-500 rounded-full blink"></span>
+                LIVE
+            </span>
+        </div>
+
+        <!-- AI Response Panel -->
+        <div id="aiResponse" class="bg-zinc-900 border-t border-green-500 px-4 py-3 hidden">
+            <div class="flex items-start gap-3">
+                <div class="text-green-500 font-bold text-xs">AI ANALYSIS:</div>
+                <div class="flex-1">
+                    <div id="aiResponseText" class="text-white text-sm mb-2"></div>
+                    <div class="flex gap-4 text-xs">
+                        <span class="text-amber-500">Confidence: <span id="aiConfidence">87</span>%</span>
+                        <button class="text-blue-500 hover:underline">[SOURCE &lt;GO&gt;]</button>
+                        <button id="clearAI" class="text-red-500 hover:underline ml-auto">[CLEAR]</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- 4-Panel Grid -->
+    <div class="terminal-grid">
+        <!-- Panel 1: Market Monitor -->
+        <div class="panel">
+            <div class="sticky top-0 bg-black border-b border-amber-600 px-3 py-2">
+                <span class="text-amber-500 font-bold text-sm">&lt;EQUITY&gt; MARKET MONITOR</span>
+            </div>
+            <table class="text-xs">
+                <thead class="sticky top-8 bg-black border-b border-zinc-700">
+                    <tr class="text-left text-amber-500">
+                        <th class="px-3 py-1">TICKER</th>
+                        <th class="px-3 py-1">NAME</th>
+                        <th class="px-3 py-1 text-right">LAST</th>
+                        <th class="px-3 py-1 text-right">CHG</th>
+                        <th class="px-3 py-1 text-right">CHG%</th>
+                        <th class="px-3 py-1 text-right">VOL</th>
+                    </tr>
+                </thead>
+                <tbody id="marketTable"></tbody>
+            </table>
+        </div>
+
+        <!-- Panel 2: News Wire with AI Sentiment -->
+        <div class="panel">
+            <div class="sticky top-0 bg-black border-b border-amber-600 px-3 py-2">
+                <span class="text-amber-500 font-bold text-sm">&lt;N&gt; NEWS WIRE</span>
+                <span class="text-xs text-zinc-500 ml-3">AI-Powered Sentiment</span>
+            </div>
+            <div id="newsWire" class="divide-y divide-zinc-900"></div>
+        </div>
+
+        <!-- Panel 3: Charts with AI Forecast -->
+        <div class="panel">
+            <div class="sticky top-0 bg-black border-b border-amber-600 px-3 py-2 flex justify-between items-center">
+                <div class="flex items-center gap-3">
+                    <span class="text-amber-500 font-bold text-sm">&lt;GP&gt; <span id="chartTicker">SPY</span> INTRADAY</span>
+                    <button id="aiForecastToggle" class="text-xs px-2 py-1 rounded font-bold bg-zinc-800 text-green-500">
+                        AI FORECAST OFF
+                    </button>
+                    <span id="forecastConfidence" class="text-xs text-green-500 hidden">Confidence: 88%</span>
+                </div>
+                <div class="flex gap-2 text-white text-xs">
+                    <span>O: <span id="open">485.32</span></span>
+                    <span class="text-green-500">H: <span id="high">487.56</span></span>
+                    <span class="text-red-500">L: <span id="low">484.21</span></span>
+                    <span>C: <span id="close">486.78</span></span>
+                </div>
+            </div>
+            <div class="chart-container">
+                <canvas id="priceChart"></canvas>
+            </div>
+            <div class="volume-chart">
+                <canvas id="volumeChart"></canvas>
+            </div>
+        </div>
+
+        <!-- Panel 4: Security Description with AI Features -->
+        <div class="panel">
+            <div class="sticky top-0 bg-black border-b border-amber-600 px-3 py-2 flex justify-between items-center">
+                <span class="text-amber-500 font-bold text-sm">&lt;DES&gt; SECURITY DESCRIPTION</span>
+                <button id="summaryBtn" class="text-xs px-3 py-1 bg-green-500 text-black rounded font-bold hover:bg-green-400">
+                    [SUMM &lt;GO&gt;]
+                </button>
+            </div>
+            <div id="securityDetails" class="px-3 py-3 space-y-3 text-xs"></div>
+        </div>
+    </div>
+
+    <!-- AI Summary Modal -->
+    <div id="summaryModal" class="modal">
+        <div class="bg-zinc-900 border-2 border-green-500 rounded-lg max-w-3xl w-full mx-4 shadow-2xl">
+            <div class="bg-black border-b border-green-500 px-6 py-4 flex justify-between items-center">
+                <div>
+                    <h3 class="text-green-500 font-bold text-lg">AI EARNINGS SUMMARY - SPY</h3>
+                    <p class="text-zinc-400 text-xs mt-1">Q4 2025 Earnings Call • AI Confidence: 94%</p>
+                </div>
+                <button id="closeModal" class="text-red-500 hover:text-red-400 text-2xl font-bold">×</button>
+            </div>
+            
+            <div class="p-6 space-y-6 max-h-96 overflow-y-auto">
+                <div>
+                    <h4 class="text-amber-500 font-bold mb-3 flex items-center gap-2">
+                        <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 20 20">
+                            <path d="M9 2a1 1 0 000 2h2a1 1 0 100-2H9z"/>
+                            <path fill-rule="evenodd" d="M4 5a2 2 0 012-2 3 3 0 003 3h2a3 3 0 003-3 2 2 0 012 2v11a2 2 0 01-2 2H6a2 2 0 01-2-2V5zm3 4a1 1 0 000 2h.01a1 1 0 100-2H7zm3 0a1 1 0 000 2h3a1 1 0 100-2h-3zm-3 4a1 1 0 100 2h.01a1 1 0 100-2H7zm3 0a1 1 0 100 2h3a1 1 0 100-2h-3z" clip-rule="evenodd"/>
+                        </svg>
+                        KEY TAKEAWAYS
+                    </h4>
+                    <div class="space-y-3">
+                        <div class="bg-green-500 bg-opacity-10 border-l-4 border-green-500 p-3 rounded">
+                            <div class="text-green-500 font-bold text-sm mb-1">✓ STRENGTH</div>
+                            <p class="text-white text-sm">Revenue beat estimates by 8.3% at $142.8B, driven by strong institutional demand and expansion into emerging markets. Operating margin improved to 31.2%.</p>
+                        </div>
+                        
+                        <div class="bg-red-500 bg-opacity-10 border-l-4 border-red-500 p-3 rounded">
+                            <div class="text-red-500 font-bold text-sm mb-1">⚠ WEAKNESS</div>
+                            <p class="text-white text-sm">Guidance for Q1 2026 came in below consensus at $138-142B (expected $145B). Management cited macroeconomic headwinds and increased competition.</p>
+                        </div>
+                        
+                        <div class="bg-blue-500 bg-opacity-10 border-l-4 border-blue-500 p-3 rounded">
+                            <div class="text-blue-500 font-bold text-sm mb-1">→ OPPORTUNITY</div>
+                            <p class="text-white text-sm">AI infrastructure buildout represents $25B TAM over next 3 years. Strategic partnership with NVDA positions company for 40%+ growth in cloud services.</p>
+                        </div>
+                    </div>
+                </div>
+
+                <div>
+                    <h4 class="text-amber-500 font-bold mb-3">MANAGEMENT HIGHLIGHTS</h4>
+                    <div class="space-y-2 text-sm text-zinc-300">
+                        <div class="flex gap-2">
+                            <span class="text-green-500">•</span>
+                            <span>Announced $60B share buyback program (12% of market cap)</span>
+                        </div>
+                        <div class="flex gap-2">
+                            <span class="text-green-500">•</span>
+                            <span>Dividend increased 10% to $0.68/share quarterly</span>
+                        </div>
+                        <div class="flex gap-2">
+                            <span class="text-green-500">•</span>
+                            <span>Reaffirmed FY2026 revenue growth target of 12-15%</span>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="border-t border-zinc-700 pt-4">
+                    <div class="flex items-center justify-between text-xs">
+                        <div class="text-zinc-500">AI Analysis powered by GPT-4 • Last updated: 2 hours ago</div>
+                        <button class="text-blue-500 hover:underline font-bold">[SOURCE &lt;GO&gt;]</button>
+                    </div>
+                </div>
+            </div>
+
+            <div class="bg-black border-t border-zinc-800 px-6 py-4 flex justify-between items-center">
+                <div class="text-xs text-zinc-500">
+                    Confidence Score: <span class="text-green-500 font-bold">94%</span> • Based on 1,247 data points
+                </div>
+                <button id="closeModalBtn" class="px-4 py-2 bg-green-500 text-black rounded font-bold text-sm hover:bg-green-400">
+                    CLOSE
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Status Bar -->
+    <div class="flex justify-between items-center px-4 py-1 bg-zinc-900 text-xs border-t border-amber-600">
+        <div class="flex gap-4">
+            <span class="text-green-500 flex items-center gap-1">
+                <span class="w-1.5 h-1.5 bg-green-500 rounded-full"></span>
+                LIVE MARKET DATA
+            </span>
+            <span class="text-amber-500">NYSE: OPEN</span>
+            <span class="text-amber-500">NASDAQ: OPEN</span>
+        </div>
+        <div class="flex gap-4">
+            <span class="text-zinc-400">Connection: <span id="latency">Stable (23ms)</span></span>
+            <span class="text-zinc-400">© 2026 Terminal</span>
+        </div>
+    </div>
+
+    <script>
+        // Market Data
+        const marketData = [
+            { ticker: 'SPY', name: 'S&P 500 ETF', price: 485.32, change: 2.45, changePercent: 0.51, volume: '89.2M' },
+            { ticker: 'QQQ', name: 'Nasdaq-100 ETF', price: 412.89, change: -1.23, changePercent: -0.30, volume: '52.1M' },
+            { ticker: 'AAPL', name: 'Apple Inc', price: 185.92, change: 3.12, changePercent: 1.71, volume: '68.4M' },
+            { ticker: 'MSFT', name: 'Microsoft Corp', price: 420.15, change: 5.67, changePercent: 1.37, volume: '32.8M' },
+            { ticker: 'GOOGL', name: 'Alphabet Inc', price: 142.38, change: -0.89, changePercent: -0.62, volume: '28.5M' },
+            { ticker: 'AMZN', name: 'Amazon.com Inc', price: 178.24, change: 2.34, changePercent: 1.33, volume: '45.2M' },
+            { ticker: 'TSLA', name: 'Tesla Inc', price: 248.50, change: -8.32, changePercent: -3.24, volume: '125.6M' },
+            { ticker: 'NVDA', name: 'NVIDIA Corp', price: 722.48, change: 12.45, changePercent: 1.75, volume: '52.3M' },
+            { ticker: 'META', name: 'Meta Platforms', price: 492.87, change: 6.23, changePercent: 1.28, volume: '18.9M' },
+            { ticker: 'BTC-USD', name: 'Bitcoin USD', price: 51234.56, change: 456.78, changePercent: 0.90, volume: '2.3B' },
+        ];
+
+        const newsItems = [
+            { time: '13:41:18', category: 'FLASH', headline: 'Fed signals potential rate cut in Q2 2026', sentiment: 0.82, impact: 'HIGH', source: 'Reuters' },
+            { time: '13:38:45', category: 'EQUITY', headline: 'NVDA reports record quarterly earnings, beats estimates', sentiment: 0.91, impact: 'HIGH', source: 'Bloomberg' },
+            { time: '13:35:12', category: 'MACRO', headline: 'US jobless claims fall to 205K, lowest in 3 months', sentiment: 0.65, impact: 'MED', source: 'WSJ' },
+            { time: '13:32:08', category: 'TECH', headline: 'AAPL announces new AI chip partnership with TSMC', sentiment: 0.78, impact: 'MED', source: 'CNBC' },
+            { time: '13:28:34', category: 'ENERGY', headline: 'Crude oil futures surge 3% on supply concerns', sentiment: -0.34, impact: 'MED', source: 'FT' },
+            { time: '13:25:19', category: 'CRYPTO', headline: 'Bitcoin breaks $51K resistance level', sentiment: 0.88, impact: 'LOW', source: 'CoinDesk' },
+            { time: '13:22:45', category: 'EARNINGS', headline: 'MSFT raises dividend by 10%, announces $60B buyback', sentiment: 0.85, impact: 'HIGH', source: 'Bloomberg' },
+            { time: '13:19:11', category: 'FOREX', headline: 'EUR/USD tests 1.0950 support amid ECB speculation', sentiment: -0.12, impact: 'LOW', source: 'Reuters' },
+        ];
+
+        let currentTicker = 'SPY';
+        let aiMode = false;
+        let showForecast = false;
+        let priceChart, volumeChart;
+
+        // Initialize
+        function init() {
+            renderMarketTable();
+            renderNewsWire();
+            renderSecurityDetails();
+            initializeCharts();
+            updateClock();
+            setInterval(updateClock, 1000);
+            setInterval(simulateDataUpdate, 3000);
+            
+            // Event listeners
+            document.getElementById('commandInput').addEventListener('keydown', handleCommand);
+            document.getElementById('aiModeToggle').addEventListener('click', toggleAIMode);
+            document.getElementById('aiForecastToggle').addEventListener('click', toggleForecast);
+            document.getElementById('summaryBtn').addEventListener('click', () => {
+                document.getElementById('summaryModal').classList.add('active');
+            });
+            document.getElementById('closeModal').addEventListener('click', closeModal);
+            document.getElementById('closeModalBtn').addEventListener('click', closeModal);
+            document.getElementById('clearAI').addEventListener('click', () => {
+                document.getElementById('aiResponse').classList.add('hidden');
+            });
+            document.getElementById('summaryModal').addEventListener('click', (e) => {
+                if (e.target.id === 'summaryModal') closeModal();
+            });
+        }
+
+        function closeModal() {
+            document.getElementById('summaryModal').classList.remove('active');
+        }
+
+        function toggleAIMode() {
+            aiMode = !aiMode;
+            const badge = document.getElementById('aiModeBadge');
+            const toggle = document.getElementById('aiModeToggle');
+            const input = document.getElementById('commandInput');
+            
+            if (aiMode) {
+                badge.classList.remove('hidden');
+                toggle.classList.remove('bg-zinc-800', 'text-green-500');
+                toggle.classList.add('bg-green-500', 'text-black');
+                toggle.textContent = 'AI MODE';
+                input.placeholder = "Ask anything: 'Compare AAPL vs MSFT revenue last 3 years'...";
+            } else {
+                badge.classList.add('hidden');
+                toggle.classList.remove('bg-green-500', 'text-black');
+                toggle.classList.add('bg-zinc-800', 'text-green-500');
+                toggle.textContent = 'AI MODE';
+                input.placeholder = "Enter ticker symbol or function...";
+            }
+        }
+
+        function toggleForecast() {
+            showForecast = !showForecast;
+            const toggle = document.getElementById('aiForecastToggle');
+            const confidence = document.getElementById('forecastConfidence');
+            
+            if (showForecast) {
+                toggle.classList.remove('bg-zinc-800', 'text-green-500');
+                toggle.classList.add('bg-green-500', 'text-black');
+                toggle.textContent = 'AI FORECAST ON';
+                confidence.classList.remove('hidden');
+            } else {
+                toggle.classList.remove('bg-green-500', 'text-black');
+                toggle.classList.add('bg-zinc-800', 'text-green-500');
+                toggle.textContent = 'AI FORECAST OFF';
+                confidence.classList.add('hidden');
+            }
+            
+            // Redraw chart with/without forecast
+            updateChart();
+        }
+
+        function handleCommand(e) {
+            if (e.key === 'Enter') {
+                const command = e.target.value.trim();
+                
+                if (aiMode || command.length > 20) {
+                    // AI query
+                    document.getElementById('aiProcessing').classList.remove('hidden');
+                    setTimeout(() => {
+                        document.getElementById('aiProcessing').classList.add('hidden');
+                        document.getElementById('aiResponse').classList.remove('hidden');
+                        document.getElementById('aiResponseText').textContent = 
+                            `Based on your query "${command}", I've identified key trends and correlations. This would connect to your AI API (Groq/OpenRouter/etc).`;
+                        document.getElementById('aiConfidence').textContent = Math.floor(Math.random() * 20 + 80);
+                    }, 1500);
+                } else {
+                    const ticker = marketData.find(item => item.ticker === command.toUpperCase());
+                    if (ticker) {
+                        selectTicker(command.toUpperCase());
+                    }
+                }
+                
+                e.target.value = '';
+            }
+        }
+
+        function selectTicker(ticker) {
+            currentTicker = ticker;
+            document.getElementById('chartTicker').textContent = ticker;
+            renderSecurityDetails();
+        }
+
+        function renderMarketTable() {
+            const tbody = document.getElementById('marketTable');
+            tbody.innerHTML = marketData.map((item, i) => `
+                <tr class="border-b border-zinc-900 market-row cursor-pointer" onclick="selectTicker('${item.ticker}')">
+                    <td class="px-3 py-1 text-yellow-400 font-bold">${item.ticker}</td>
+                    <td class="px-3 py-1 text-zinc-400">${item.name}</td>
+                    <td class="px-3 py-1 text-right text-white">${item.price.toFixed(2)}</td>
+                    <td class="px-3 py-1 text-right ${item.change >= 0 ? 'text-green-500' : 'text-red-500'}">
+                        ${item.change >= 0 ? '+' : ''}${item.change.toFixed(2)}
+                    </td>
+                    <td class="px-3 py-1 text-right ${item.changePercent >= 0 ? 'text-green-500' : 'text-red-500'}">
+                        ${item.changePercent >= 0 ? '+' : ''}${item.changePercent.toFixed(2)}%
+                    </td>
+                    <td class="px-3 py-1 text-right text-zinc-400">${item.volume}</td>
+                </tr>
+            `).join('');
+        }
+
+        function renderNewsWire() {
+            const newsWire = document.getElementById('newsWire');
+            newsWire.innerHTML = newsItems.map(item => {
+                const sentimentClass = item.sentiment > 0.5 ? 'bg-green-500 bg-opacity-20 text-green-500' :
+                                      item.sentiment < -0.5 ? 'bg-red-500 bg-opacity-20 text-red-500' :
+                                      'bg-yellow-500 bg-opacity-20 text-yellow-500';
+                const impactClass = item.impact === 'HIGH' ? 'bg-red-500 bg-opacity-20 text-red-500' :
+                                   item.impact === 'MED' ? 'bg-yellow-500 bg-opacity-20 text-yellow-500' :
+                                   'bg-zinc-500 bg-opacity-20 text-zinc-500';
+                
+                return `
+                    <div class="px-3 py-2 news-item cursor-pointer">
+                        <div class="flex items-start gap-3 mb-1">
+                            <span class="text-amber-500 shrink-0 text-xs">${item.time}</span>
+                            <span class="shrink-0 font-bold text-xs ${item.category === 'FLASH' ? 'text-red-500' : 'text-blue-500'}">
+                                [${item.category}]
+                            </span>
+                            <span class="text-white text-xs flex-1">${item.headline}</span>
+                        </div>
+                        <div class="flex items-center gap-2 ml-20">
+                            <span class="text-xs font-bold px-2 py-0.5 rounded ${sentimentClass}">
+                                ${item.sentiment > 0 ? '+' : ''}${item.sentiment.toFixed(2)}
+                            </span>
+                            <span class="text-xs font-bold px-2 py-0.5 rounded ${impactClass}">
+                                ${item.impact}
+                            </span>
+                            <span class="text-xs text-zinc-600">${item.source}</span>
+                        </div>
+                    </div>
+                `;
+            }).join('');
+        }
+
+        function renderSecurityDetails() {
+            const relatedPlays = [
+                { ticker: 'QQQ', correlation: 0.94, reason: 'Tech-heavy exposure', move: '+0.8%' },
+                { ticker: 'IVV', correlation: 0.99, reason: 'Identical S&P 500 tracking', move: '+0.5%' },
+                { ticker: 'VOO', correlation: 0.98, reason: 'Vanguard S&P 500 alternative', move: '+0.5%' }
+            ];
+
+            const detailsDiv = document.getElementById('securityDetails');
+            detailsDiv.innerHTML = `
+                <div>
+                    <div class="text-yellow-400 text-lg font-bold">${currentTicker}</div>
+                    <div class="text-white">SPDR S&P 500 ETF Trust</div>
+                    <div class="text-zinc-400">NYSE ARCA | Exchange Traded Fund</div>
+                </div>
+
+                <div class="grid grid-cols-2 gap-x-6 gap-y-2">
+                    <div><span class="text-amber-500">Market Cap:</span> <span class="text-white">$442.8B</span></div>
+                    <div><span class="text-amber-500">P/E Ratio:</span> <span class="text-white">23.45</span></div>
+                    <div><span class="text-amber-500">52W High:</span> <span class="text-green-500">498.34</span></div>
+                    <div><span class="text-amber-500">52W Low:</span> <span class="text-red-500">412.67</span></div>
+                    <div><span class="text-amber-500">Avg Volume:</span> <span class="text-white">78.3M</span></div>
+                    <div><span class="text-amber-500">Beta:</span> <span class="text-white">1.00</span></div>
+                    <div><span class="text-amber-500">Dividend:</span> <span class="text-white">$6.24</span></div>
+                    <div><span class="text-amber-500">Yield:</span> <span class="text-white">1.29%</span></div>
+                </div>
+
+                <div class="pt-3 border-t border-zinc-800">
+                    <div class="text-amber-500 mb-2">DESCRIPTION</div>
+                    <div class="text-zinc-300 leading-relaxed">
+                        The SPDR S&P 500 ETF Trust seeks to provide investment results that correspond to the price and yield performance of the S&P 500 Index.
+                    </div>
+                </div>
+
+                <div class="pt-3 border-t border-zinc-800">
+                    <div class="flex items-center justify-between mb-2">
+                        <div class="text-amber-500">AI RELATED PLAYS</div>
+                        <div class="text-green-500 text-xs">Confidence: 92%</div>
+                    </div>
+                    <div class="space-y-2">
+                        ${relatedPlays.map(play => `
+                            <div class="bg-zinc-900 p-2 rounded related-play cursor-pointer" onclick="selectTicker('${play.ticker}')">
+                                <div class="flex items-center justify-between mb-1">
+                                    <span class="text-yellow-400 font-bold">${play.ticker}</span>
+                                    <span class="font-bold ${play.move.startsWith('+') ? 'text-green-500' : 'text-red-500'}">
+                                        ${play.move}
+                                    </span>
+                                </div>
+                                <div class="text-zinc-400 text-xs mb-1">${play.reason}</div>
+                                <div class="flex items-center gap-2">
+                                    <span class="text-xs text-zinc-600">Correlation:</span>
+                                    <div class="flex-1 bg-zinc-800 h-1 rounded overflow-hidden">
+                                        <div class="bg-green-500 h-full" style="width: ${play.correlation * 100}%"></div>
+                                    </div>
+                                    <span class="text-xs text-green-500">${(play.correlation * 100).toFixed(0)}%</span>
+                                </div>
+                            </div>
+                        `).join('')}
+                    </div>
+                </div>
+
+                <div class="pt-3 border-t border-zinc-800">
+                    <div class="text-amber-500 mb-2">AVAILABLE FUNCTIONS</div>
+                    <div class="grid grid-cols-2 gap-2 text-blue-500">
+                        <div>GP - Price Graph</div>
+                        <div>DES - Description</div>
+                        <div>CN - Company News</div>
+                        <div>FA - Financial Analysis</div>
+                        <div>RV - Relative Value</div>
+                        <div>OMON - Options Monitor</div>
+                    </div>
+                </div>
+            `;
+        }
+
+        function generateChartData() {
+            const data = [];
+            const basePrice = 485;
+            for (let i = 0; i < 78; i++) {
+                const time = `${9 + Math.floor(i / 12)}:${(i % 12) * 5}`;
+                const volatility = (Math.random() - 0.5) * 2;
+                data.push({
+                    time,
+                    price: (basePrice + (i * 0.05) + volatility).toFixed(2),
+                    volume: Math.floor(Math.random() * 5000000) + 1000000
+                });
+            }
+            return data;
+        }
+
+        function initializeCharts() {
+            const chartData = generateChartData();
+            const labels = chartData.map(d => d.time);
+            const priceData = chartData.map(d => parseFloat(d.price));
+            const volumeData = chartData.map(d => d.volume);
+
+            const priceCtx = document.getElementById('priceChart').getContext('2d');
+            priceChart = new Chart(priceCtx, {
+                type: 'line',
+                data: {
+                    labels: labels,
+                    datasets: [{
+                        label: 'Price',
+                        data: priceData,
+                        borderColor: '#00FF00',
+                        backgroundColor: 'rgba(0, 255, 0, 0.1)',
+                        borderWidth: 1,
+                        pointRadius: 0,
+                        tension: 0.1
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: { legend: { display: false } },
+                    scales: {
+                        x: {
+                            ticks: { color: '#FFA028', font: { size: 9 } },
+                            grid: { color: '#333' }
+                        },
+                        y: {
+                            ticks: { color: '#FFA028', font: { size: 9 } },
+                            grid: { color: '#333' }
+                        }
+                    }
+                }
+            });
+
+            const volumeCtx = document.getElementById('volumeChart').getContext('2d');
+            volumeChart = new Chart(volumeCtx, {
+                type: 'bar',
+                data: {
+                    labels: labels,
+                    datasets: [{
+                        label: 'Volume',
+                        data: volumeData,
+                        backgroundColor: '#0068FF'
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: { legend: { display: false } },
+                    scales: {
+                        x: {
+                            ticks: { color: '#FFA028', font: { size: 9 } },
+                            grid: { color: '#333' }
+                        },
+                        y: {
+                            ticks: { color: '#FFA028', font: { size: 9 } },
+                            grid: { color: '#333' }
+                        }
+                    }
+                }
+            });
+        }
+
+        function updateChart() {
+            // Update chart with forecast overlay if enabled
+            // This would add the dashed forecast line
+        }
+
+        function updateClock() {
+            const now = new Date();
+            const timeString = now.toLocaleTimeString('en-US', { hour12: false });
+            document.getElementById('clock').textContent = timeString;
+        }
+
+        function simulateDataUpdate() {
+            marketData.forEach(item => {
+                const randomChange = (Math.random() - 0.5) * 0.5;
+                item.price += randomChange;
+                item.change += randomChange;
+                item.changePercent = (item.change / (item.price - item.change)) * 100;
+            });
+            renderMarketTable();
+            
+            const latency = Math.floor(Math.random() * 30) + 15;
+            document.getElementById('latency').textContent = `Stable (${latency}ms)`;
+        }
+
+        window.addEventListener('DOMContentLoaded', init);
+    </script>
+</body>
+</html>

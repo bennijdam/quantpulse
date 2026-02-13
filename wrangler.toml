@@ -1,0 +1,33 @@
+name = "quantpulse-edge"
+main = "src/index.ts"
+compatibility_date = "2024-01-01"
+
+# R2 Bucket bindings for data storage
+[[r2_buckets]]
+binding = "MARKET_DATA"
+bucket_name = "quantpulse-data"
+preview_bucket_name = "quantpulse-data-preview"
+
+# KV namespace for caching
+# Replace these IDs with your actual Cloudflare KV namespace IDs
+# Get them from: https://dash.cloudflare.com -> Workers & Pages -> KV
+[[kv_namespaces]]
+binding = "CACHE"
+id = "your-kv-namespace-id"  # Replace with your production KV namespace ID
+preview_id = "your-preview-kv-namespace-id"  # Replace with your preview KV namespace ID
+
+# Environment variables
+[env.production.vars]
+ENVIRONMENT = "production"
+
+[env.staging.vars]
+ENVIRONMENT = "staging"
+
+# Build configuration
+[build]
+command = "npm install && npm run build"
+
+# Routes
+[[routes]]
+pattern = "quantpulse.com/api/*"
+zone_name = "quantpulse.com"
