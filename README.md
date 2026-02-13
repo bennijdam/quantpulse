@@ -2,6 +2,19 @@
 
 A professional-grade financial analytics platform built with Turborepo, featuring advanced quantitative analysis tools and a Bloomberg-style terminal interface.
 
+## ⚠️ Important: Branch Information
+
+**The complete monorepo is currently on the `copilot/build-turborepo-setup-again` branch.**
+
+The main branch only contains this README. To access the full codebase, apps, packages, and scripts, please use the feature branch:
+
+```bash
+# Clone the repository and switch to the development branch
+git clone https://github.com/bennijdam/quantpulse.git
+cd quantpulse
+git checkout copilot/build-turborepo-setup-again
+```
+
 ## 📥 Get Started Locally
 
 **New to this repository?** Check out our comprehensive [Local Development Guide](./LOCAL_DEVELOPMENT.md) for step-by-step instructions on setting up the project on your local machine.
@@ -13,6 +26,9 @@ A professional-grade financial analytics platform built with Turborepo, featurin
 git clone https://github.com/bennijdam/quantpulse.git
 cd quantpulse
 
+# Switch to the development branch
+git checkout copilot/build-turborepo-setup-again
+
 # Run the quick start script (handles installation and build)
 ./scripts/quick-start.sh
 ```
@@ -23,6 +39,9 @@ cd quantpulse
 # Clone the repository
 git clone https://github.com/bennijdam/quantpulse.git
 cd quantpulse
+
+# Switch to the development branch
+git checkout copilot/build-turborepo-setup-again
 
 # Install dependencies
 npm install

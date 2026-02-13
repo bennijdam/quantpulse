@@ -25,6 +25,12 @@ Expected output should show versions >= the prerequisites listed above.
 
 ## 🚀 Getting Started Locally
 
+### ⚠️ Important: Branch Notice
+
+**The complete monorepo is currently on the `copilot/build-turborepo-setup-again` branch.**
+
+The main branch only contains a basic README. Make sure to checkout the development branch after cloning!
+
 ### Step 1: Clone the Repository
 
 Clone the repository to your local machine:
@@ -38,6 +44,9 @@ git clone git@github.com:bennijdam/quantpulse.git
 
 # Navigate into the project directory
 cd quantpulse
+
+# IMPORTANT: Switch to the development branch
+git checkout copilot/build-turborepo-setup-again
 ```
 
 ### Step 2: Install Dependencies

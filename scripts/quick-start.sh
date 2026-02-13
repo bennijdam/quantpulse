@@ -9,6 +9,26 @@ echo "🚀 QuantPulse Local Development Setup"
 echo "======================================"
 echo ""
 
+# Check if we're on the correct branch
+CURRENT_BRANCH=$(git rev-parse --abbrev-ref HEAD 2>/dev/null || echo "unknown")
+if [ "$CURRENT_BRANCH" != "copilot/build-turborepo-setup-again" ]; then
+    echo "⚠️  WARNING: You are on branch '$CURRENT_BRANCH'"
+    echo ""
+    echo "The complete monorepo is on the 'copilot/build-turborepo-setup-again' branch."
+    echo ""
+    echo "To switch to the correct branch, run:"
+    echo "   git checkout copilot/build-turborepo-setup-again"
+    echo ""
+    echo "If you just cloned the repository, the main branch only contains a README."
+    echo ""
+    read -p "Do you want to continue anyway? (y/N) " -n 1 -r
+    echo ""
+    if [[ ! $REPLY =~ ^[Yy]$ ]]; then
+        echo "Setup cancelled. Please switch to the correct branch first."
+        exit 1
+    fi
+fi
+
 # Check Node.js version
 echo "📋 Checking prerequisites..."
 if ! command -v node &> /dev/null; then
